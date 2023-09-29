@@ -1,4 +1,3 @@
-# app/services/api/v1/blob_creator_service.rb
 module Api
   module V1
     class BlobCreatorService
@@ -10,31 +9,36 @@ module Api
       end
 
       def create
-        blob = nil
+        begin
+          blob = nil
 
-        ActiveRecord::Base.transaction do
-          blob = Blob.create!(
-            name: @name,
-            uuid: @uuid,
-            size: @file.size,
-            storage_type: @storage_type
-          )
+          ActiveRecord::Base.transaction do
+            blob = Blob.create!(
+              name: @name,
+              uuid: @uuid,
+              size: @file.size,
+              storage_type: @storage_type
+            )
 
-          BlobStorage.create!(
-            blob_id: blob.id,
-            file_data: @file.read
-          )
+            BlobStorage.create!(
+              blob_id: blob.id,
+              file_data: @file.read
+            )
+          end
+
+          { blob: blob, error: nil }
+        rescue ActiveRecord::RecordInvalid => e
+          # Catching ActiveRecord validation errors
+          error_message = e.message
+          Rails.logger.error("Error creating blob: #{error_message}")
+
+          { blob: nil, error: "Failed to create blob. #{error_message}" }
+        rescue StandardError => e
+          # Catching other unexpected errors
+          Rails.logger.error("Unexpected error creating blob: #{e.message}")
+
+          { blob: nil, error: "An unexpected error occurred while creating blob. #{e.message}" }
         end
-
-        blob
-      rescue ActiveRecord::RecordNotUnique => e
-        # Handle duplicate entry
-        Rails.logger.error("Error creating Blob: #{e.message}")
-        nil
-      rescue StandardError => e
-        # Handle other errors
-        Rails.logger.error("Error creating Blob: #{e.message}")
-        nil
       end
     end
   end
