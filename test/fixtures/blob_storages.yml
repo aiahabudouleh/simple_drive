@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  blob: one
+  file_data: 
+
+two:
+  blob: two
+  file_data: 

@@ -1,3 +1,4 @@
+# app/services/api/v1/blob_creator_service.rb
 module Api
   module V1
     class BlobCreatorService
@@ -9,20 +10,31 @@ module Api
       end
 
       def create
-        Blob.create!(
-          name: @name,
-          uuid: @uuid,
-          size: calculate_file_size, 
-          storage_type: @storage_type
-        )
+        blob = nil
+
+        ActiveRecord::Base.transaction do
+          blob = Blob.create!(
+            name: @name,
+            uuid: @uuid,
+            size: @file.size,
+            storage_type: @storage_type
+          )
+
+          BlobStorage.create!(
+            blob_id: blob.id,
+            file_data: @file.read
+          )
+        end
+
+        blob
       rescue ActiveRecord::RecordNotUnique => e
         # Handle duplicate entry
-      end
-
-      private
-
-      def calculate_file_size
-        @file.size if @file.respond_to?(:size)
+        Rails.logger.error("Error creating Blob: #{e.message}")
+        nil
+      rescue StandardError => e
+        # Handle other errors
+        Rails.logger.error("Error creating Blob: #{e.message}")
+        nil
       end
     end
   end

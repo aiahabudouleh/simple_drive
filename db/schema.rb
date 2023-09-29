@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_29_070530) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_29_164149) do
+  create_table "blob_storages", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.binary "file_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blob_id"], name: "index_blob_storages_on_blob_id"
+  end
+
   create_table "blobs", force: :cascade do |t|
     t.string "name"
     t.string "uuid"
@@ -31,4 +39,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_29_070530) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "blob_storages", "blobs"
 end
