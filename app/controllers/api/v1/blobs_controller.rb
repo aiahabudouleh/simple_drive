@@ -14,7 +14,7 @@ module Api
           created_blob = create_blob(uploaded_file)
 
           if created_blob[:success]
-            render json: { blob:  Api::V1::BlobMapper.map(created_blob[:blob], created_blob[:blob_storage].file_data) }, status: :created
+            render json: { blob: Api::V1::BlobMapper.map(created_blob[:blob], created_blob[:blob_storage].file_data) }, status: :created
           else
             render json: { error: created_blob[:error] }, status: :unprocessable_entity
           end
@@ -24,7 +24,11 @@ module Api
       end
 
       def show
-        render json: { blob:  Api::V1::BlobMapper.map(@blob, @blob_storage.file_data) }, status: :ok
+        if @blob
+          render json: { blob: Api::V1::BlobMapper.map(@blob, @blob_storage.file_data) }, status: :ok
+        else
+          render json: { error: 'Blob not found' }, status: :not_found
+        end
       end
 
       private
@@ -37,7 +41,7 @@ module Api
           storage_type: params[:storage_type]
         ).create
 
-        if result[:success]
+        if result[:blob]
           blob = result[:blob]
           blob_storage = BlobStorage.find_by(blob_id: blob.id)
           { success: true, blob: blob, blob_storage: blob_storage }
@@ -49,10 +53,6 @@ module Api
       def set_blob
         @blob = Blob.find_by(uuid: params[:id])
         @blob_storage = BlobStorage.find_by(blob_id: @blob.id) if @blob
-
-        unless @blob
-          render json: { error: 'Blob not found' }, status: :not_found
-        end
       end
     end
   end
