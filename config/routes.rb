@@ -12,4 +12,14 @@ Rails.application.routes.draw do
 
   root to: 'users#new'
 
+  namespace :api do
+    namespace :v1 do
+      resources :blobs do
+        member do
+          resources :blobs, only: [:create]
+        end
+      end
+    end
+  end
+
 end
