@@ -7,6 +7,7 @@ module Api
             id: blob.uuid,
             size: blob.size,
             created_at: blob.created_at.utc,
+            storage_type: blob.storage_type,
             file_data: utf8_encoded_file_data(blob_data)
           }
         end

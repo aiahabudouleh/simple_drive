@@ -38,7 +38,7 @@ module Api
           name: uploaded_file.original_filename,
           uuid: params[:id],
           file: uploaded_file,
-          storage_type: params[:storage_type]
+          storage_type: ENV['STORAGE_TYPE']
         ).create
 
         if result[:blob]

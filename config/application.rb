@@ -15,5 +15,7 @@ module SimpleDrive
     config.autoload_paths += %W(#{config.root}/app/mappers)
 
     # Other configuration settings...
+    Dotenv::Railtie.load
+
   end
 end
