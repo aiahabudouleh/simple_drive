@@ -14,7 +14,7 @@ module Api
           created_blob = create_blob(uploaded_file)
 
           if created_blob[:success]
-            render json: { blob: Api::V1::BlobMapper.map(created_blob[:blob], created_blob[:blob_storage].file_data) }, status: :created
+            render json: { blob: Api::V1::BlobMapper.map(created_blob[:blob], created_blob[:file_data]) }, status: :created
           else
             render json: { error: created_blob[:error] }, status: :unprocessable_entity
           end
@@ -44,7 +44,7 @@ module Api
         if result[:blob]
           blob = result[:blob]
           blob_storage = BlobStorage.find_by(blob_id: blob.id)
-          { success: true, blob: blob, blob_storage: blob_storage }
+          { success: true, blob: blob, file_data: result[:file_data] }
         else
           { success: false, error: result[:error] }
         end

@@ -6,6 +6,7 @@ module Api
         @uuid = uuid
         @file = file
         @storage_type = storage_type
+        @file_data = @file.read
       end
 
       def create
@@ -20,13 +21,15 @@ module Api
               storage_type: @storage_type
             )
 
-            BlobStorage.create!(
-              blob_id: blob.id,
-              file_data: @file.read
-            )
+            if (@storage_type == 'db_storage')
+              BlobStorage.create!(
+                blob_id: blob.id,
+                file_data: @file_data
+              )
+            end
           end
 
-          { blob: blob, error: nil }
+          { blob: blob, error: nil, file_data: @file_data }
         rescue ActiveRecord::RecordInvalid => e
           # Catching ActiveRecord validation errors
           error_message = e.message
