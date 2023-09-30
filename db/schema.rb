@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_29_164149) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_30_185457) do
   create_table "blob_storages", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.binary "file_data"
@@ -30,6 +30,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_29_164149) do
     t.index ["uuid"], name: "index_blobs_on_uuid", unique: true
   end
 
+  create_table "local_blob_storages", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.string "file_path"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blob_id"], name: "index_local_blob_storages_on_blob_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -40,4 +48,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_29_164149) do
   end
 
   add_foreign_key "blob_storages", "blobs"
+  add_foreign_key "local_blob_storages", "blobs"
 end

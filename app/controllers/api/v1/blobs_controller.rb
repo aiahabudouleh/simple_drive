@@ -25,7 +25,7 @@ module Api
 
       def show
         if @blob
-          render json: { blob: Api::V1::BlobMapper.map(@blob, @blob_storage.file_data) }, status: :ok
+          render json: { blob: Api::V1::BlobMapper.map(@blob, @blob_data) }, status: :ok
         else
           render json: { error: 'Blob not found' }, status: :not_found
         end
@@ -52,8 +52,13 @@ module Api
 
       def set_blob
         @blob = Blob.find_by(uuid: params[:id])
-        @blob_storage = BlobStorage.find_by(blob_id: @blob.id) if @blob
+        @blob_data = retrieve_blob_data(@blob.id) if @blob
       end
+
+      def retrieve_blob_data(blob_id)
+        Api::V1::BlobRetrievalService.retrieve_blob_data(blob_id)
+      end
+
     end
   end
 end

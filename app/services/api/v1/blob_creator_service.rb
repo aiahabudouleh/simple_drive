@@ -1,3 +1,4 @@
+# app/services/api/v1/blob_creator_service.rb
 module Api
   module V1
     class BlobCreatorService
@@ -21,15 +22,11 @@ module Api
               storage_type: @storage_type
             )
 
-            if @storage_type == 'db_storage'
-              BlobStorage.create!(
-                blob_id: blob.id,
-                file_data: @file_data
-              )
-            end
-
-            if @storage_type == 'local_storage'
-              save_file_to_server_storage
+            case @storage_type
+            when 'db_storage'
+              Api::V1::DBStorageService.create(blob, @file_data)
+            when 'local_storage'
+              Api::V1::LocalStorageService.create(blob, @file.read)
             end
           end
 
@@ -47,25 +44,6 @@ module Api
           { blob: nil, error: "An unexpected error occurred while creating blob. #{e.message}" }
         end
       end
-
-    private
-      def save_file_to_server_storage
-        directory_path = ENV['LOCAL_STORAGE_PATH']
-        FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
-      
-        file_path = File.join(directory_path, "#{@uuid}_file.txt")
-        Rails.logger.debug("File Path: #{file_path}")
-        #Rails.logger.debug("Data: #{@file_data}")
-      
-        begin
-          # Specify binary encoding when writing the file
-          File.binwrite(file_path, @file_data)
-        rescue StandardError => e
-          Rails.logger.error("Error writing file to server storage: #{e.message}")
-          raise "Failed to write file to server storage. #{e.message}"
-        end
-      end
-      
 
     end
   end
