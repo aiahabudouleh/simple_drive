@@ -26,7 +26,7 @@ module Api
             when 'db_storage'
               Api::V1::DBStorageService.create(blob, @file_data)
             when 'local_storage'
-              Api::V1::LocalStorageService.create(blob, @file.read)
+              Api::V1::LocalStorageService.create(blob, @file_data, @file.original_filename)
             end
           end
 
