@@ -1,4 +1,6 @@
 # app/services/api/v1/blob_creator_service.rb
+require_relative 'db_storage_service'
+
 module Api
   module V1
     class BlobCreatorService

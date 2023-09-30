@@ -39,7 +39,7 @@ module Api
       
           begin
             file_data = File.binread(local_blob_storage.file_path)
-            Rails.logger.debug("File Data Successfully Read from Local Storage #{file_data}")
+            Rails.logger.debug("File Data Successfully Read from Local Storage")
             return file_data
           rescue StandardError => e
             Rails.logger.error("Error reading file from local storage: #{e.message}")
