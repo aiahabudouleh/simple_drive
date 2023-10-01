@@ -2,7 +2,6 @@
 module Api
   module V1
     class BlobsController < ApplicationController
-      before_action :set_blob, only: [:show]
 
       def create
         validator = Api::V1::BlobCreatorValidator.new
