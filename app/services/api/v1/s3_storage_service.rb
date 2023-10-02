@@ -7,19 +7,14 @@ module Api
           filename_without_extension = File.basename(file_name, '.*')
           s3_key = "#{filename_without_extension}"
 
-          Rails.logger.info("S3StorageService: Creating blob record and uploading file to S3 with key: #{s3_key}")
-
           # Upload file to S3
-          file_url = S3Client.upload_file(file_data.tempfile, s3_key)
+          file_url = S3Client.upload_file(file_data, s3_key)
 
           Rails.logger.info("S3StorageService: File uploaded successfully to S3 with URL: #{file_url}")
 
-          # Save record to S3BlobStorage
-          S3BlobStorage.create!(
-            blob_id: blob.id,
-            s3_key: s3_key,
-            s3_url: file_url
-          )
+          save_to_s3_blob_storage(blob, s3_key, file_url)
+
+          { message: 'File uploaded successfully', file_url: file_url }
         rescue StandardError => e
           Rails.logger.error("S3StorageService: Error saving file to S3 storage: #{e.message}")
           raise "Failed to save file to S3 storage. #{e.message}"
@@ -35,26 +30,28 @@ module Api
 
           Rails.logger.info("S3StorageService: Retrieving file content from S3 with key: #{s3_key}")
 
-          # Reuse the same Tempfile throughout the method
+          # Provide a local_path, for example, a temporary file
           temp_file = Tempfile.new(filename)
           local_path = temp_file.path
+          downloaded_file = S3Client.download_file(s3_key, local_path)
 
-          file_content = S3Client.download_file(s3_key, local_path)
-
-          if file_content
-            Rails.logger.info("S3StorageService: File content successfully retrieved from S3")
-            {
-              filename: filename,
-              content: file_content
-            }
+          if downloaded_file
+            # Return the file content
+            temp_file.read
           else
-            Rails.logger.error("S3StorageService: Error retrieving file content from S3")
-            nil
+            raise StandardError, 'Error downloading file'
           end
-          
-            # Close and unlink the temporary file after use
-            temp_file.close
-            temp_file.unlink
+        end
+
+        private
+
+        def save_to_s3_blob_storage(blob, s3_key, file_url)
+          # Save record to S3BlobStorage
+          S3BlobStorage.create!(
+            blob_id: blob.id,
+            s3_key: s3_key,
+            s3_url: file_url
+          )
         end
       end
     end

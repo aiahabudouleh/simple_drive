@@ -19,6 +19,7 @@ module Api
       def create
         ActiveRecord::Base.transaction do
           blob = create_blob_record
+          
           storage_service = storage_service_factory(@storage_type)
           storage_service.create(blob, @file_data, @file.original_filename)
           { blob: blob, error: nil, file_data: @file_data }

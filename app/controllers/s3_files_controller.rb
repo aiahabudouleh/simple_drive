@@ -26,7 +26,7 @@ class S3FilesController < ApplicationController
         file_content = S3Client.download_file(s3_key, local_path)
     
         if file_content
-          send_data file_content, filename: filename, disposition: 'inline'
+          send_data temp_file.read, filename: filename, disposition: 'inline'
     
           # Ensure the temporary file is closed and unlinked after sending data
           temp_file.close
