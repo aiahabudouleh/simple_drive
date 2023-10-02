@@ -2,7 +2,9 @@
 module Api
   module V1
     class LocalStorageService
-      def self.create(blob, file_data, file_name)
+      def self.create(blob, file)
+        file_name= file.original_filename
+        file_data = file.read
         storage_path = ENV['LOCAL_STORAGE_PATH']
         FileUtils.mkdir_p(storage_path) unless Dir.exist?(storage_path)
 
@@ -19,7 +21,7 @@ module Api
         raise "Failed to save file to local storage. #{e.message}"
       end
 
-      def self.retrieve_from_local_storage(blob_id)
+      def self.retrieve_blob_data(blob_id)
         local_blob_storage = LocalBlobStorage.find_by(blob_id: blob_id)
 
         if local_blob_storage

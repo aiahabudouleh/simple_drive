@@ -4,7 +4,7 @@ class S3FilesController < ApplicationController
       file = params[:file]
       filename_without_extension = File.basename(file.original_filename, '.*')
       s3_key = "#{filename_without_extension}"
-      puts "Upload S3_key : #{s3_key}"
+      #puts "Upload S3_key : #{s3_key}"
       file_url = S3Client.upload_file(file.tempfile, s3_key)
   
       if file_url
@@ -17,7 +17,7 @@ class S3FilesController < ApplicationController
     def download
         filename = params[:filename]
         s3_key = "#{filename}"
-        puts "Download S3_key : #{s3_key}"
+        #puts "Download S3_key : #{s3_key}"
 
         # Provide a local_path, for example, a temporary file
         temp_file = Tempfile.new(filename)

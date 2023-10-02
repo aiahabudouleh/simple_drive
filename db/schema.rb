@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_30_185457) do
+ActiveRecord::Schema[7.0].define(version: 2023_10_02_070828) do
   create_table "blob_storages", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.binary "file_data"

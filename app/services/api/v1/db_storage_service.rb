@@ -2,15 +2,26 @@
 module Api
   module V1
     class DBStorageService
-      def self.create(blob, file_data)
-        BlobStorage.create!(
-          blob_id: blob.id,
-          file_data: file_data 
-        )
-      end
-  
-      def self.retrieve_from_db_storage(blob_id)
-        BlobStorage.find_by(blob_id: blob_id)&.file_data
+      class << self
+        def create(blob, file)
+          file_data = file.read
+          Rails.logger.debug("DBStorageService: Creating BlobStorage record for blob_id #{blob.id}")
+          BlobStorage.create!(
+            blob_id: blob.id,
+            file_data: file_data 
+          )
+        rescue StandardError => e
+          Rails.logger.error("DBStorageService: Error creating BlobStorage record: #{e.message}")
+          raise e
+        end
+
+        def retrieve_blob_data(blob_id)
+          Rails.logger.debug("DBStorageService: Retrieving file_data for blob_id #{blob_id}")
+          BlobStorage.find_by(blob_id: blob_id)&.file_data
+        rescue StandardError => e
+          Rails.logger.error("DBStorageService: Error retrieving file_data: #{e.message}")
+          raise e
+        end
       end
     end
   end
