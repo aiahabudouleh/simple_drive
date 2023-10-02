@@ -3,12 +3,11 @@ module Api
   module V1
     class DBStorageService
       class << self
-        def create(blob, file)
-          file_data = file.read
+        def create(blob, file_data, file_name)
           Rails.logger.debug("DBStorageService: Creating BlobStorage record for blob_id #{blob.id}")
           BlobStorage.create!(
             blob_id: blob.id,
-            file_data: file_data 
+            file_data: file_data
           )
         rescue StandardError => e
           Rails.logger.error("DBStorageService: Error creating BlobStorage record: #{e.message}")

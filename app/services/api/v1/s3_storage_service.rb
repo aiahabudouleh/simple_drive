@@ -3,15 +3,15 @@ module Api
   module V1
     class S3StorageService
       class << self
-        def create(blob, file)
-          filename_without_extension = File.basename(file.original_filename, '.*')
+        def create(blob, file_data, file_name)
+          filename_without_extension = File.basename(file_name, '.*')
           s3_key = "#{filename_without_extension}"
 
           Rails.logger.info("S3StorageService: Creating blob record and uploading file to S3 with key: #{s3_key}")
-          
+
           # Upload file to S3
-          file_url = S3Client.upload_file(file.tempfile, s3_key)
-          
+          file_url = S3Client.upload_file(file_data.tempfile, s3_key)
+
           Rails.logger.info("S3StorageService: File uploaded successfully to S3 with URL: #{file_url}")
 
           # Save record to S3BlobStorage
@@ -51,10 +51,10 @@ module Api
             Rails.logger.error("S3StorageService: Error retrieving file content from S3")
             nil
           end
-
-          # Close and unlink the temporary file after use
-          temp_file.close
-          temp_file.unlink
+          
+            # Close and unlink the temporary file after use
+            temp_file.close
+            temp_file.unlink
         end
       end
     end

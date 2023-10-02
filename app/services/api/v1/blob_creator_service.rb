@@ -20,7 +20,7 @@ module Api
         ActiveRecord::Base.transaction do
           blob = create_blob_record
           storage_service = storage_service_factory(@storage_type)
-          storage_service.create(blob, @file)
+          storage_service.create(blob, @file_data, @file.original_filename)
           { blob: blob, error: nil, file_data: @file_data }
         rescue ActiveRecord::RecordInvalid => e
           handle_record_invalid_error(e)
@@ -47,7 +47,7 @@ module Api
         when 'local_storage'
           Api::V1::LocalStorageService
         when 's3_storage'
-          Api::V1::LocalStorageService
+          Api::V1::S3StorageService  # Fixed to use S3StorageService for 's3_storage'
         else
           raise UnsupportedStorageType, "Unsupported storage type: #{@storage_type}"
         end
