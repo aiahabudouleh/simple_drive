@@ -3,6 +3,7 @@ module Api
   module V1
     class BlobsController < ApplicationController
       before_action :set_blob, only: [:show]
+      before_action :authorize_request, except: [:logn, :signup]
 
       def create
         validator = Api::V1::BlobCreatorValidator.new
