@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery unless: -> { request.format.json? }
-  before_action :authorize_request, except: [:login, :signup]
+  #before_action :authorize_request, except: [:login, :signup]
   
   def authorize_request
     header = request.headers['Authorization']
