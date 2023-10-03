@@ -5,7 +5,7 @@ class S3FilesController < ApplicationController
       filename_without_extension = File.basename(file.original_filename, '.*')
       s3_key = "#{filename_without_extension}"
       #puts "Upload S3_key : #{s3_key}"
-      file_url = S3Client.upload_file(file.tempfile, s3_key)
+      file_url = S3HttpClient.upload_file(file.tempfile, s3_key)
   
       if file_url
         render json: { message: 'File uploaded successfully', file_url: file_url }
@@ -23,7 +23,7 @@ class S3FilesController < ApplicationController
         temp_file = Tempfile.new(filename)
         local_path = temp_file.path
     
-        file_content = S3Client.download_file(s3_key, local_path)
+        file_content = S3HttpClient.download_file(s3_key, local_path)
     
         if file_content
           send_data temp_file.read, filename: filename, disposition: 'inline'
