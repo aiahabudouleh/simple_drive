@@ -26,6 +26,26 @@ class S3HttpClient
       handle_response(response)
     end
 
+    def upload_file(local_file_path, s3_key)
+      uri = build_s3_uri(s3_key)
+      Rails.logger.info("Upload URI: #{uri}")
+
+      request = Net::HTTP::Put.new(uri, {
+        'Content-Type' => 'application/octet-stream'
+      })
+
+      request.body = File.read(local_file_path)
+
+      sign_s3_request(request)
+
+      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+        http.request(request)
+      end
+
+      handle_response(response)
+    end
+
+
     private
 
     def build_s3_uri(s3_key)

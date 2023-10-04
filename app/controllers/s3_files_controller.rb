@@ -1,4 +1,5 @@
 # app/controllers/s3_files_controller.rb
+# testing S2 connection, Usually it requires Super admin API authority to develop Backdoor APIS
 class S3FilesController < ApplicationController
     def upload
       file = params[:file]
