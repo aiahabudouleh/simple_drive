@@ -48,7 +48,7 @@ module Api
         when 'local_storage'
           Api::V1::LocalStorageService
         when 's3_storage'
-          Api::V1::S3StorageService  # Fixed to use S3StorageService for 's3_storage'
+          Api::V1::S3StorageService  
         else
           raise UnsupportedStorageType, "Unsupported storage type: #{@storage_type}"
         end
