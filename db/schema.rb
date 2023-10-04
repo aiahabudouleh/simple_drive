@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_09_30_185457) do
+ActiveRecord::Schema[7.0].define(version: 2023_10_02_111405) do
   create_table "blob_storages", force: :cascade do |t|
     t.integer "blob_id", null: false
     t.binary "file_data"
@@ -38,6 +38,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_30_185457) do
     t.index ["blob_id"], name: "index_local_blob_storages_on_blob_id"
   end
 
+  create_table "s3_blob_storages", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.string "s3_key"
+    t.string "s3_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blob_id"], name: "index_s3_blob_storages_on_blob_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -49,4 +58,5 @@ ActiveRecord::Schema[7.0].define(version: 2023_09_30_185457) do
 
   add_foreign_key "blob_storages", "blobs"
   add_foreign_key "local_blob_storages", "blobs"
+  add_foreign_key "s3_blob_storages", "blobs"
 end

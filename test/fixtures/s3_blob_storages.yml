@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  s3_url: MyString
+  s3_key: MyString
+
+two:
+  s3_url: MyString
+  s3_key: MyString

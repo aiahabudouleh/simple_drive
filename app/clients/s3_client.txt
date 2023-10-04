@@ -21,7 +21,8 @@ class S3Client
     
     file_url = obj.public_url.to_s
     puts "File uploaded successfully. : #{obj}"
-    
+    puts "File uploaded successfully URL : #{file_url}"
+
     file_url
   rescue StandardError => e
     puts "Error uploading file: #{e.message}"
