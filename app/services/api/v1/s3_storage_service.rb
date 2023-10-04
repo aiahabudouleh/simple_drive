@@ -8,7 +8,7 @@ module Api
           s3_key = "#{filename_without_extension}"
 
           # Upload file to S3
-          file_url = S3Client.upload_file(file_data, s3_key)
+          file_url = S3HttpClient.upload_file(file_data, s3_key)
 
           Rails.logger.info("S3StorageService: File uploaded successfully to S3 with URL: #{file_url}")
 
@@ -21,7 +21,7 @@ module Api
         end
 
         def retrieve_blob_data(blob_id)
-          s3_storage = S3BlobStorage.find_by(blob_id: blob_id)
+          s3_storage = S3HttpClient.find_by(blob_id: blob_id)
 
           return unless s3_storage
 
