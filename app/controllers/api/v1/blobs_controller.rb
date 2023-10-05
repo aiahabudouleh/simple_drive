@@ -38,11 +38,9 @@ module Api
         Rails.logger.info("BlobsController: Creating blob from uploaded file")
 
         result = Api::V1::BlobCreatorService.new(
-          name: uploaded_file.original_filename,
           uuid: params[:id],
-          file: uploaded_file,
-          storage_type: ENV['STORAGE_TYPE']
-        ).create
+          uploaded_file: uploaded_file
+       ).create
 
         if result[:blob]
           blob = result[:blob]
@@ -57,13 +55,12 @@ module Api
 
       def set_blob
         @blob = Blob.find_by(uuid: params[:id])
-        
         @blob_data = retrieve_blob_data(@blob.id) if @blob
       end
 
       def retrieve_blob_data(blob_id)
         Rails.logger.debug("BlobsController: Retrieving blob data for blob_id #{blob_id}")
-        Api::V1::BlobRetrievalService.retrieve_blob_data(blob_id)
+        Api::V1::StorageServiceAdapter.new().retrieve_blob_data(blob_id)
       end
     end
   end

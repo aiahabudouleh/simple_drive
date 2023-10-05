@@ -14,7 +14,8 @@ module Api
 
       def retrieve_blob_data(blob_id)
         Rails.logger.debug("DBStorageService: Retrieving file_data for blob_id #{blob_id}")
-        BlobStorage.find_by(blob_id: blob_id)&.file_data
+        blob_storage = BlobStorage.find_by(blob_id: blob_id)
+        blob_storage.file_data
       rescue StandardError => e
         handle_error("Error retrieving file_data", e)
       end

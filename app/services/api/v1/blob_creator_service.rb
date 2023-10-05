@@ -6,11 +6,12 @@ module Api
     class BlobCreatorService
       class UnsupportedStorageType < StandardError; end
 
-      def initialize(name:, uuid:, file:, storage_type:)
-        @name = name
+      def initialize(uploaded_file:, uuid:)
+        @name = uploaded_file.original_filename
         @uuid = uuid
-        @file = file
-        @storage_type = storage_type
+        @file = uploaded_file
+        @storage_adapter = Api::V1::StorageServiceAdapter.new()
+        @storage_type = ENV['storage_type']
         @file_data = @file.read
       end
 
@@ -18,8 +19,7 @@ module Api
         ActiveRecord::Base.transaction do
           blob = create_blob_record
           
-          storage_adapter = StorageServiceAdapter.new(@storage_type)
-          storage_adapter.create(blob, @file_data, @file.original_filename)
+          @storage_adapter.create(blob, @file_data, @file.original_filename)
           { blob: blob, error: nil, file_data: @file_data }
         rescue ActiveRecord::RecordInvalid => e
           handle_record_invalid_error(e)

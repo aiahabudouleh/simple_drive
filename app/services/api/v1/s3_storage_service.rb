@@ -11,7 +11,7 @@ module Api
 
         Rails.logger.info("S3StorageService: File uploaded successfully to S3 with URL: #{file_url}")
 
-        save_to_s3_blob_storage(blob, s3_key, file_url)
+        blob.update(file_path: s3_key)
 
         { message: 'File uploaded successfully', file_url: file_url }
       rescue StandardError => e
@@ -45,7 +45,6 @@ module Api
 
       private
 
-      def save_to_s3_blob_storage(blob, s3_key, file_url)
         # Save record to S3BlobStorage
         S3BlobStorage.create!(
           blob_id: blob.id,

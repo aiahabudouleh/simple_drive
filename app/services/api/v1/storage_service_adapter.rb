@@ -1,16 +1,22 @@
+# app/services/api/v1/storage_service_adapter.rb
+
 require_relative 'db_storage_service'
 require_relative 'local_storage_service'
-require_relative 's3_storage_service'
-
 module Api
     module V1
       class StorageServiceAdapter
-        def initialize(storage_type)
-          @storage_type = storage_type
+        class UnsupportedStorageType < StandardError; end
+  
+        def initialize()
+          @storage_type = ENV['storage_type']
         end
   
-        def create(blob, file_data, original_filename)
-          storage_service.create(blob, file_data, original_filename)
+        def create(blob, file, file_data)
+          storage_service.create(blob, file, file_data)
+        end
+  
+        def retrieve_blob_data(blob_id)
+          storage_service.retrieve_blob_data(blob_id)
         end
   
         private
@@ -30,3 +36,4 @@ module Api
       end
     end
   end
+  
