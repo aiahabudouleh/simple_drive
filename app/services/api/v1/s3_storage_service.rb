@@ -1,4 +1,3 @@
-# app/services/api/v1/s3_storage_service.rb
 module Api
   module V1
     class S3StorageService
@@ -11,7 +10,7 @@ module Api
 
         Rails.logger.info("S3StorageService: File uploaded successfully to S3 with URL: #{file_url}")
 
-        blob.update(file_path: s3_key)
+        update_blob_path(blob, s3_key)
 
         { message: 'File uploaded successfully', file_url: file_url }
       rescue StandardError => e
@@ -19,11 +18,8 @@ module Api
       end
 
       def retrieve_blob_data(blob_id)
-        s3_storage = S3HttpClient.find_by(blob_id: blob_id)
-
-        return unless s3_storage
-
-        s3_key = s3_storage.s3_key
+        blob = Blob.find(blob_id)
+        s3_key = blob.source_path
         filename = File.basename(s3_key)
 
         Rails.logger.info("S3StorageService: Retrieving file content from S3 with key: #{s3_key}")
@@ -31,11 +27,12 @@ module Api
         # Provide a local_path, for example, a temporary file
         temp_file = Tempfile.new(filename)
         local_path = temp_file.path
-        downloaded_file = S3Client.download_file(s3_key, local_path)
+
+        downloaded_file = S3HttpClient.download_file(s3_key, local_path)
 
         if downloaded_file
           # Return the file content
-          temp_file.read
+          downloaded_file
         else
           raise StandardError, 'Error downloading file'
         end
@@ -45,14 +42,23 @@ module Api
 
       private
 
-        # Save record to S3BlobStorage
+      def update_blob_path(blob, s3_key)
+        blob.update(file_path: s3_key)
+        save_to_s3_blob_storage(blob, s3_key)
+      end
+
+      def save_to_s3_blob_storage(blob, s3_key)
         S3BlobStorage.create!(
           blob_id: blob.id,
           s3_key: s3_key,
-          s3_url: file_url
+          s3_url: generate_s3_url(s3_key)
         )
       rescue StandardError => e
         handle_error("Error saving to S3BlobStorage", e)
+      end
+
+      def generate_s3_url(s3_key)
+        "https://#{ENV['AWS_BUCKET']}.s3.amazonaws.com/#{s3_key}"
       end
 
       def handle_error(message, error)

@@ -13,11 +13,12 @@ module Api
       def create(file, uuid)
         blob = nil
         file_data = file.read
-        Rails.logger.info("File_content: #{file_data}");
+        Rails.logger.info("File_content: #{file_data}")
+
         ActiveRecord::Base.transaction do
           begin
             blob = create_blob(file, uuid)
-            storage_service.create(blob, file_data, file.original_filename)
+            storage_service(@storage_type).create(blob, file_data, file.original_filename)
           rescue ActiveRecord::RecordInvalid => e
             return handle_record_invalid_error(e)
           rescue UnsupportedStorageType, StandardError => e
@@ -29,7 +30,8 @@ module Api
       end
 
       def retrieve_blob_data(blob_id)
-        storage_service.retrieve_blob_data(blob_id)
+        blob = Blob.find(blob_id)
+        storage_service(blob.storage_type).retrieve_blob_data(blob_id)
       end
 
       private
@@ -43,8 +45,8 @@ module Api
         )
       end
 
-      def storage_service
-        case @storage_type
+      def storage_service(storage_type)
+        case storage_type
         when 'db_storage'
           Api::V1::DBStorageService.new
         when 'local_storage'
@@ -52,7 +54,7 @@ module Api
         when 's3_storage'
           Api::V1::S3StorageService.new
         else
-          raise UnsupportedStorageType, "Unsupported storage type: #{@storage_type}"
+          raise UnsupportedStorageType, "Unsupported storage type: #{storage_type}"
         end
       end
 
