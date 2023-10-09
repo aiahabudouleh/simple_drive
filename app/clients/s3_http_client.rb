@@ -98,6 +98,7 @@ class S3HttpClient
     end
 
     def build_signing_key(date)
+      date = Time.now.utc.strftime('%Y%m%d') 
       k_date = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), "AWS4#{AWS_SECRET_ACCESS_KEY}", date)
       k_region = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), k_date, AWS_REGION)
       k_service = OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), k_region, 's3')
