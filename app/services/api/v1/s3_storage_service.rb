@@ -43,18 +43,7 @@ module Api
       private
 
       def update_blob_path(blob, s3_key)
-        blob.update(file_path: s3_key)
-        save_to_s3_blob_storage(blob, s3_key)
-      end
-
-      def save_to_s3_blob_storage(blob, s3_key)
-        S3BlobStorage.create!(
-          blob_id: blob.id,
-          s3_key: s3_key,
-          s3_url: generate_s3_url(s3_key)
-        )
-      rescue StandardError => e
-        handle_error("Error saving to S3BlobStorage", e)
+        blob.update(source_path: s3_key)
       end
 
       def generate_s3_url(s3_key)

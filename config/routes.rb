@@ -12,9 +12,6 @@ Rails.application.routes.draw do
   post '/sign-up'  =>  'users#create'
   root to: 'users#new'
 
-  post 's3_files/upload', to: 's3_files#upload', as: :upload_file
-  get 's3_files/download/:filename', to: 's3_files#download', as: :download_file
-
   namespace :api do
     namespace :v1 do
       resources :blobs do

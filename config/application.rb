@@ -12,7 +12,6 @@ module SimpleDrive
     # Add the following line inside the Application class block
     config.autoload_paths += %W(#{config.root}/app/services)
     config.autoload_paths += %W(#{config.root}/app/validators)
-    config.autoload_paths += %W(#{config.root}/app/mappers)
     config.autoload_paths += %W(#{config.root}/app/util)
     config.autoload_paths += %W(#{config.root}/app/clients)
     # Other configuration settings...

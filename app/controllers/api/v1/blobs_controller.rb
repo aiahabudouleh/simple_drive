@@ -5,15 +5,18 @@ module Api
       before_action :authorize_request, except: [:login, :signup]
 
       def create
-        Api::V1::BlobCreatorValidator.new.validate_params(params)
-
-        if params[:data].respond_to?(:size)
+        begin
+          Api::V1::BlobCreatorValidator.new.validate_params(params)
           created_blob = Api::V1::StorageServiceAdapter.new.create(params[:data], params[:id])
           render_blob_response(created_blob)
-        else
-          render json: { error: 'Invalid file format or file missing size method' }, status: :unprocessable_entity
+        rescue Api::V1::ValidationError => e
+          render json: { error: e.message }, status: :unprocessable_entity
+        rescue StandardError => e
+          render json: { error: "An unexpected error occurred: #{e.message}" }, status: :internal_server_error
         end
       end
+      
+      
 
       def show
         if @blob
