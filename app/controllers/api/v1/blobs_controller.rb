@@ -1,32 +1,26 @@
-# app/controllers/api/v1/blobs_controller.rb
 module Api
   module V1
     class BlobsController < ApplicationController
       before_action :set_blob, only: [:show]
-      before_action :authorize_request, except: [:logn, :signup]
+      before_action :authorize_request, except: [:login, :signup]
 
       def create
-        validator = Api::V1::BlobCreatorValidator.new
-        validator.validate_params(params)
-
-        uploaded_file = params[:data]
-
-        if uploaded_file.respond_to?(:size)
-          created_blob = create_blob(uploaded_file)
-
-          if created_blob[:success]
-            render json: { blob: Api::V1::BlobMapper.map(created_blob[:blob], created_blob[:file_data]) }, status: :created
-          else
-            render json: { error: created_blob[:error] }, status: :unprocessable_entity
-          end
-        else
-          render json: { error: 'Invalid file format or file missing size method' }, status: :unprocessable_entity
+        begin
+          Api::V1::BlobCreatorValidator.new.validate_params(params)
+          created_blob = Api::V1::StorageServiceAdapter.new.create(params[:data], params[:id])
+          render_blob_response(created_blob)
+        rescue Api::V1::ValidationError => e
+          render json: { error: e.message }, status: :unprocessable_entity
+        rescue StandardError => e
+          render json: { error: "An unexpected error occurred: #{e.message}" }, status: :internal_server_error
         end
       end
+      
+      
 
       def show
         if @blob
-          render json: { blob: Api::V1::BlobMapper.map(@blob, @blob_data) }, status: :ok
+          render_blob_response({ blob: @blob, file_data: @blob_data })
         else
           render json: { error: 'Blob not found' }, status: :not_found
         end
@@ -34,36 +28,35 @@ module Api
 
       private
 
-      def create_blob(uploaded_file)
-        Rails.logger.info("BlobsController: Creating blob from uploaded file")
-
-        result = Api::V1::BlobCreatorService.new(
-          name: uploaded_file.original_filename,
-          uuid: params[:id],
-          file: uploaded_file,
-          storage_type: ENV['STORAGE_TYPE']
-        ).create
-
-        if result[:blob]
-          blob = result[:blob]
-          blob_storage = BlobStorage.find_by(blob_id: blob.id)
-          Rails.logger.info("BlobsController: Blob created successfully - Blob ID: #{blob.id}")
-          { success: true, blob: blob, file_data: result[:file_data] }
+      def render_blob_response(response_data)
+        if response_data[:error].nil?
+          render json: {
+            id: response_data[:blob].id,
+            size: response_data[:blob].size,
+            created_at: response_data[:blob].created_at.utc,
+            storage_type: response_data[:blob].storage_type,
+            file_data: response_data[:file_data].force_encoding('UTF-8').encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
+          }, status: :ok
         else
-          Rails.logger.error("BlobsController: Error creating blob: #{result[:error]}")
-          { success: false, error: result[:error] }
+          render json: { error: response_data[:error] }, status: :unprocessable_entity
         end
       end
 
       def set_blob
         @blob = Blob.find_by(uuid: params[:id])
-        
-        @blob_data = retrieve_blob_data(@blob.id) if @blob
+      
+        if @blob
+          Rails.logger.debug("Blob found with UUID: #{params[:id]}")
+          @blob_data = retrieve_blob_data(@blob.id)
+        else
+          Rails.logger.debug("Blob not found with UUID: #{params[:id]}")
+        end
       end
+      
 
       def retrieve_blob_data(blob_id)
         Rails.logger.debug("BlobsController: Retrieving blob data for blob_id #{blob_id}")
-        Api::V1::BlobRetrievalService.retrieve_blob_data(blob_id)
+        Api::V1::StorageServiceAdapter.new.retrieve_blob_data(blob_id)
       end
     end
   end
